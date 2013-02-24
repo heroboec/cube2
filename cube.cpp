@@ -1,7 +1,7 @@
 
 
 #include <qmath.h>
-
+#include <QtAlgorithms>
 #include "cube.h"
 
 
@@ -66,34 +66,6 @@ void cube::init()
     m_faces[5] = Face(tmp0,tmp1,tmp2,tmp3);
 
 
-
-//    m_cubeVertices[0].setPos( 1.0,-1.0, 1.0);
-//    m_cubeVertices[1].setPos( 1.0, 1.0, 1.0);
-//    m_cubeVertices[2].setPos( 1.0, 1.0,-1.0);
-//    m_cubeVertices[3].setPos( 1.0,-1.0,-1.0);
-
-//    m_cubeVertices[4].setPos(-1.0,-1.0, 1.0);
-//    m_cubeVertices[5].setPos(-1.0, 1.0, 1.0);
-//    m_cubeVertices[6].setPos(-1.0, 1.0,-1.0);
-//    m_cubeVertices[7].setPos(-1.0,-1.0,-1.0);
-
-
-//    m_cubePolygons[0].setVert(1,0,3);
-//    m_cubePolygons[1].setVert(1,3,2);
-//    m_cubePolygons[2].setVert(1,2,6);
-//    m_cubePolygons[3].setVert(1,6,5);
-//    m_cubePolygons[4].setVert(1,5,4);
-//    m_cubePolygons[5].setVert(1,4,0);
-//    m_cubePolygons[6].setVert(7,0,4);
-//    m_cubePolygons[7].setVert(7,3,0);
-//    m_cubePolygons[8].setVert(7,2,3);
-//    m_cubePolygons[9].setVert(7,6,2);
-//    m_cubePolygons[10].setVert(7,5,6);
-//    m_cubePolygons[11].setVert(7,4,5);
-
-    evaluatePolygonsNormals();
-
-
     m_phi = 45;
     m_omega = 0;
     m_cubeW = 800;
@@ -141,52 +113,6 @@ QVector3D& cube::createVectorByPoint(PointDDD& a,PointDDD& b)
 
 void cube::evaluatePolygonsNormals()
 {
-    //   ,     1 ,   
-    //           
-//    for (int i=0;i<12;i+=2)
-//    {
-//        QVector3D a = createVectorByPoint(
-//                    m_cubeVertices[m_cubePolygons[i].getVertNum(0)].getPos(),
-//                    m_cubeVertices[m_cubePolygons[i].getVertNum(1)].getPos());
-//        QVector3D b = createVectorByPoint(
-//                    m_cubeVertices[m_cubePolygons[i].getVertNum(0)].getPos(),
-//                    m_cubeVertices[m_cubePolygons[i].getVertNum(2)].getPos());
-//      //  a.normalize();
-//      //  b.normalize();
-//        QVector3D normal = QVector3D::crossProduct(a,b);
-//        normal.normalize();
-//        m_cubePolygons[i].setNormal(normal);
-//        m_cubePolygons[i+1].setNormal(normal);
-//        for (int k=0;k<m_lights.count(); k++)
-//        {
-//            float distToLight = 1/createVectorByPoint(m_cubeCenter,m_lights[k].pos).length();
-//            QVector3D v;
-//            v.setX(0);
-//            v.setY(0);
-//            v.setZ(-2);
-
-//        }
-
-
-////        //  -  ,   ,
-////        //        )))
-////        for (int k=0; k<3;k++)
-////        {
-////            QVector3D norm =
-////                    m_cubeVertices[m_cubePilygons[i].getVertNum(k)].getNormal();
-////            norm.setX(norm.x()+normal.x());
-////            norm.setZ(norm.z()+normal.z());
-////            norm.setY(norm.y()+normal.y());
-////            m_cubeVertices[m_cubePilygons[i].getVertNum(k)].setNormal(norm);
-////        }
-////        Vertex diff  = getDiffVert(m_cubePilygons[i],m_cubePilygons[i+1]);
-
-//    }
-
-
-
-
-
 
 }
 
@@ -225,19 +151,45 @@ void cube::evaluateCube()
     pen.setStyle(Qt::SolidLine);
     m_cubePainter->setPen(pen);
     clearCubeImage();
-
+    QVector< Polygon > tmpScreenCoords;
+   // tmpScreenCoords.clear();
     for (int i=0;i<6;i++)
     {
         ScreenPolygonFaceCoordsSruct tmp =  m_faces[i].draw(a,b,c,d);
-        link(tmp.poly0.v0,tmp.poly0.v1);
-        link(tmp.poly0.v0,tmp.poly0.v2);
-        link(tmp.poly0.v2,tmp.poly0.v1);
+//        tmpScreenCoords.append(tmp.poly0);
+//        tmpScreenCoords.append(tmp.poly1);
+
+        //рисуем не сразу и не все !!!
+//        link(tmp.poly0.v0,tmp.poly0.v1);
+//        link(tmp.poly0.v0,tmp.poly0.v2);
+//        link(tmp.poly0.v2,tmp.poly0.v1);
 
 
-        link(tmp.poly0.v0,tmp.poly1.v1);
-        link(tmp.poly0.v0,tmp.poly1.v2);
-        link(tmp.poly0.v2,tmp.poly1.v1);
+//        link(tmp.poly0.v0,tmp.poly1.v1);
+//        link(tmp.poly0.v0,tmp.poly1.v2);
+//        link(tmp.poly0.v2,tmp.poly1.v1);
     }
+
+    QVector< Polygon > tmpPolyArr;
+    tmpPolyArr.clear();
+    for (int j=0;j<6;j++)
+    {
+        tmpPolyArr.append(m_faces[j].getNPolygon(0));
+        tmpPolyArr.append(m_faces[j].getNPolygon(1));
+
+    }
+    qSort(tmpPolyArr.begin(), tmpPolyArr.end(),order);
+    for (int t=0;t<7;t++)
+    {
+        ScreenPolygonCoordsStruct tmp = tmpPolyArr[t].getScreenCords();
+        link(tmp.v0,tmp.v1);
+        link(tmp.v0,tmp.v2);
+        link(tmp.v2,tmp.v1);
+    }
+
+
+
+
 
 //    static int linkArr[8][3]={{1,3,4},{0,2,5},{1,3,6},
 //                              {0,2,7},{0,5,7},{1,4,6},
@@ -284,6 +236,10 @@ void cube::evaluateCube()
 
 
 
+
+
+
+
 void cube::rotate(double omega, double phi)
 {
     m_omega += omega;
@@ -308,11 +264,6 @@ void cube::evaluateSimpleInt()
 {
     for (int i=0;i<12;i++)
     {
-        //           ?)))
-        // ,    ,     )
-
-
-
         for (int k=0;k<m_lights.count();k++)
         {
 
@@ -321,12 +272,11 @@ void cube::evaluateSimpleInt()
 }
 
 
+bool cube::order(  Polygon & p1,  Polygon & p2 )
+{
+    return p1.getLayout() < p2.getLayout();
+}
 
-//=========================
-
-
-
-//======================================
 
 
 

@@ -46,6 +46,7 @@ private:
 
 
     void init();
+    static bool order(  Polygon & p1,  Polygon & p2 );
     void clearCubeImage();
     //double getIntensity(lightsData &ldata);
     QVector3D& createVectorByPoint(PointDDD& a,PointDDD& b);

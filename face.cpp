@@ -23,3 +23,15 @@ ScreenPolygonFaceCoordsSruct& Face::draw(double a, double b, double c, double d)
     ScreenPolygonFaceCoordsSructResult.poly1 = polTwo.calcCoords(a,b,c,d);
     return ScreenPolygonFaceCoordsSructResult;
 }
+
+Polygon& Face::getNPolygon(int n)
+{
+    if (n == 0)
+    {
+        return polOne;
+    }
+    else if (n == 1)
+    {
+        return polTwo;
+    }
+}

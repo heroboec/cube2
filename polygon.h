@@ -14,16 +14,22 @@ private:
     Vertex m_worldVertexes[3];
     Vertex m_visualVertexes[3];
     QPoint m_screenCoord[3];
-    ScreenPolygonCoordsSruct screenCoordsSructResult;
+    ScreenPolygonCoordsStruct screenCoordsSructResult;
+    double layout;
+
+    void calculateNormal();
 
 public:
     Polygon();
+    double getLayout();
     Polygon(Vertex& v1, Vertex& v2, Vertex& v3);
-    ScreenPolygonCoordsSruct &calcCoords(double a, double b, double c, double d);
+    ScreenPolygonCoordsStruct &calcCoords(double a, double b, double c, double d);
     void setPolyInt(double);
     double getPolyInt();
     void setNormal(QVector3D& norm);
     QVector3D& createVectorByPoint(PointDDD& a,PointDDD& b);
+    void calculateLayout();
+    ScreenPolygonCoordsStruct & getScreenCords();
     //void setVert(int a,int b,int c);
 
     const QVector3D &getNormal();

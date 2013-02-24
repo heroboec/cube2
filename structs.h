@@ -2,7 +2,7 @@
 #define STRUCTS_H
 #include <QVector2D>
 
-struct ScreenPolygonCoordsSruct
+struct ScreenPolygonCoordsStruct
 {
     QPoint v0;
     QPoint v1;
@@ -11,8 +11,8 @@ struct ScreenPolygonCoordsSruct
 
 struct ScreenPolygonFaceCoordsSruct
 {
-    ScreenPolygonCoordsSruct poly0;
-    ScreenPolygonCoordsSruct poly1;
+    ScreenPolygonCoordsStruct poly0;
+    ScreenPolygonCoordsStruct poly1;
 };
 
 
