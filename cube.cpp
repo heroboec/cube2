@@ -2,6 +2,7 @@
 
 #include <qmath.h>
 #include <QtAlgorithms>
+#include <QDebug>
 #include "cube.h"
 
 
@@ -94,6 +95,10 @@ void cube::init()
     m_cubeCenter.setZ(0);
 
 
+
+    a=b=c=d=0;
+
+
 }
 
 
@@ -141,11 +146,11 @@ void cube::evaluatePolygonsNormals()
 
 void cube::evaluateCube()
 {
-    double a = cos(m_phi/180);
-    double b = sin(m_phi/180);
+    a = cos(m_phi/180);
+    b = sin(m_phi/180);
 
-    double c = cos(m_omega/180);
-    double d = sin(m_omega/180);
+    c = cos(m_omega/180);
+    d = sin(m_omega/180);
     QPen pen;
     pen.setColor(Qt::cyan);
     pen.setStyle(Qt::SolidLine);
@@ -170,26 +175,27 @@ void cube::evaluateCube()
 //        link(tmp.poly0.v2,tmp.poly1.v1);
     }
 
-    QVector< Polygon > tmpPolyArr;
-    tmpPolyArr.clear();
+
+
+
+    FaceArr.clear();
     for (int j=0;j<6;j++)
     {
-        tmpPolyArr.append(m_faces[j].getNPolygon(0));
-        tmpPolyArr.append(m_faces[j].getNPolygon(1));
+        FaceArr.append(m_faces[j]);
+        FaceArr.append(m_faces[j]);
 
     }
-    qSort(tmpPolyArr.begin(), tmpPolyArr.end(),order);
-    for (int t=0;t<7;t++)
+    qSort(FaceArr.begin(), FaceArr.end(),order);
+
+    QColor col(Qt::red);
+    for (int t=4;t>-1;t--)
     {
-        ScreenPolygonCoordsStruct tmp = tmpPolyArr[t].getScreenCords();
-        link(tmp.v0,tmp.v1);
-        link(tmp.v0,tmp.v2);
-        link(tmp.v2,tmp.v1);
+        drawFaceColor(FaceArr[t],col);
+        pen.setColor(Qt::cyan);
+        pen.setStyle(Qt::SolidLine);
+        m_cubePainter->setPen(pen);
+        drawFace(FaceArr[t]);
     }
-
-
-
-
 
 //    static int linkArr[8][3]={{1,3,4},{0,2,5},{1,3,6},
 //                              {0,2,7},{0,5,7},{1,4,6},
@@ -262,19 +268,90 @@ void cube::clearCubeImage()
 
 void cube::evaluateSimpleInt()
 {
-    for (int i=0;i<12;i++)
-    {
-        for (int k=0;k<m_lights.count();k++)
-        {
 
-        }
+}
+
+
+bool cube::order(  Face & p1,  Face & p2 )
+{
+    return p1.getFaceLayer() < p2.getFaceLayer();
+}
+
+bool cube::pointCompare(QPoint& pnt1, QPoint& pnt2)
+{
+    return pnt1.y() > pnt2.y();
+}
+
+
+void cube::drawFace(Face& fce)
+{
+    for (int i =0;i<2;i++)
+    {
+        Polygon tmp = fce.getNPolygon(i);
+        ScreenPolygonCoordsStruct poly =  tmp.getScreenCords();
+        m_cubePainter->drawLine(poly.v0.x(),poly.v0.y(),poly.v1.x(),poly.v1.y());
+        m_cubePainter->drawLine(poly.v0.x(),poly.v0.y(),poly.v2.x(),poly.v2.y());
+        m_cubePainter->drawLine(poly.v1.x(),poly.v1.y(),poly.v2.x(),poly.v2.y());
     }
 }
 
 
-bool cube::order(  Polygon & p1,  Polygon & p2 )
+void cube::drawFaceColor(Face& fce, QColor& color)
 {
-    return p1.getLayout() < p2.getLayout();
+    QPen pen;
+    pen.setColor(color);
+    pen.setStyle(Qt::SolidLine);
+    m_cubePainter->setPen(pen);
+    for (int i=0;i<2;i++)
+    {
+        Polygon tmpPoly = fce.getNPolygon(i);
+        ScreenPolygonCoordsStruct tmpSCoords = tmpPoly.getScreenCords();
+        QVector <QPoint> pointArr;
+        pointArr.clear();
+        pointArr.append(tmpSCoords.v0);
+        pointArr.append(tmpSCoords.v1);
+        pointArr.append(tmpSCoords.v2);
+
+        qSort(pointArr.begin(),pointArr.end(),pointCompare);
+        QPoint A = pointArr[0];
+        QPoint B = pointArr[1];
+        QPoint C = pointArr[2];
+
+
+        int sy = A.y();
+        int x1,x2;
+        for (sy = A.y(); sy >= C.y(); sy--) {
+            if (A.y() == C.y())
+            {
+                x1 = A.x();
+            }
+            else
+            {
+                x1 = (int)(A.x() + (sy - A.y()) * (C.x() - A.x()) / (C.y() - A.y()));
+            }
+            if (sy > B.y())
+                if (A.y() == B.y())
+                {
+                    x2 = A.x();
+                }
+            else
+                {
+                    x2 = (int)(A.x() + (sy - A.y()) * (B.x() - A.x()) / (B.y() - A.y()));
+                }
+          else {
+                if (C.y() == B.y())
+                {
+                    x2 = B.x();
+                }
+            else
+                {
+                    x2 = (int)(B.x() + (sy - B.y()) * (C.x() - B.x()) / (C.y() - B.y()));
+                }
+          }
+            m_cubePainter->drawLine(x1,sy,x2,sy);
+        }
+
+    }
 }
 
 

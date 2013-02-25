@@ -13,6 +13,7 @@ Face::Face(PointDDD& v1, PointDDD& v2, PointDDD& v3, PointDDD& v4 )
     Vertex v4l = v4;
     this->polOne=Polygon((v1l),(v2l),(v4l));
     this->polTwo=Polygon((v1l),(v3l),(v4l));
+    calculateFaceLayer();
 }
 
 
@@ -21,6 +22,7 @@ ScreenPolygonFaceCoordsSruct& Face::draw(double a, double b, double c, double d)
 {
     ScreenPolygonFaceCoordsSructResult.poly0 = polOne.calcCoords(a,b,c,d);
     ScreenPolygonFaceCoordsSructResult.poly1 = polTwo.calcCoords(a,b,c,d);
+    calculateFaceLayer();
     return ScreenPolygonFaceCoordsSructResult;
 }
 
@@ -34,4 +36,18 @@ Polygon& Face::getNPolygon(int n)
     {
         return polTwo;
     }
+}
+
+
+void Face::calculateFaceLayer()
+{
+    double tmpLayer = 0;
+    tmpLayer += polOne.getLayout();
+    tmpLayer += polTwo.getLayout();
+    faceLayer = tmpLayer;
+}
+
+double Face::getFaceLayer()
+{
+    return this->faceLayer;
 }

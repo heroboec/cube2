@@ -29,6 +29,8 @@ class cube:public QObject
 {
     Q_OBJECT
 private:
+    double a,b,c,d;
+    QVector< Face > FaceArr;
     enum {VERTICESCNT=8, SCREENDIST=300};
     void link(QPoint& p1,QPoint& p2);
    // Vertex m_cubeVertices[8];
@@ -46,7 +48,8 @@ private:
 
 
     void init();
-    static bool order(  Polygon & p1,  Polygon & p2 );
+    static bool order(  Face &p1,  Face &p2 );
+    static bool pointCompare(QPoint& pnt1, QPoint& pnt2);
     void clearCubeImage();
     //double getIntensity(lightsData &ldata);
     QVector3D& createVectorByPoint(PointDDD& a,PointDDD& b);
@@ -54,6 +57,8 @@ private:
 
     void evaluatePolygonsNormals();
     void evaluateSimpleInt();
+    void drawFace(Face& fce);
+    void drawFaceColor(Face &fce, QColor &color);
     
 public:
     void evaluateCube();
