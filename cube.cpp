@@ -19,6 +19,7 @@ cube::cube()
 
 void cube::init()
 {
+
     PointDDD tmp0 = PointDDD( 1, 1, 1);
     PointDDD tmp1 = PointDDD( 1,-1, 1);
     PointDDD tmp2 = PointDDD( 1, 1,-1);
@@ -94,9 +95,9 @@ void cube::init()
     m_cubeCenter.setY(0);
     m_cubeCenter.setZ(0);
 
-
-
-    a=b=c=d=0;
+    m_screenLighsPos.clear();
+    m_visLightPos.clear();
+    a = b = c = d = 0;
 
 
 }
@@ -122,28 +123,6 @@ void cube::evaluatePolygonsNormals()
 }
 
 
-//Vertex & cube::getDiffVert(Polygon &p1,Polygon &p2)
-//{
-//    int bingo;
-//    for (int i=0;i<3;i++)
-//    {
-//        bingo = 0;
-//        for (int k=0;k<3;k++)
-//        {
-//            if (p1.getVertNum(i) == p2.getVertNum(k))
-//            {
-//                bingo = 1;
-//            }
-//        }
-//        if (bingo == 0 )
-//        {
-//            return m_cubeVertices[i];
-//        }
-//    }
-
-//}
-
-
 void cube::evaluateCube()
 {
     a = cos(m_phi/180);
@@ -160,23 +139,27 @@ void cube::evaluateCube()
    // tmpScreenCoords.clear();
     for (int i=0;i<6;i++)
     {
-        ScreenPolygonFaceCoordsSruct tmp =  m_faces[i].draw(a,b,c,d);
-//        tmpScreenCoords.append(tmp.poly0);
-//        tmpScreenCoords.append(tmp.poly1);
+        m_faces[i].calculate(a,b,c,d);
 
-        //рисуем не сразу и не все !!!
-//        link(tmp.poly0.v0,tmp.poly0.v1);
-//        link(tmp.poly0.v0,tmp.poly0.v2);
-//        link(tmp.poly0.v2,tmp.poly0.v1);
-
-
-//        link(tmp.poly0.v0,tmp.poly1.v1);
-//        link(tmp.poly0.v0,tmp.poly1.v2);
-//        link(tmp.poly0.v2,tmp.poly1.v1);
     }
 
+    for (int i = 0; i<m_lights.count();i++)
+    {
+        for (int i=0; i<3; i++)
+        {
+            lightSourceData tmp = m_lights[i];
+            PointDDD newPos = PointDDD((-d)*tmp.pos.getX()+c*tmp.pos.getY(),
+                (-a)*c*tmp.pos.getX()+(-a)*d*tmp.pos.getY()+b*tmp.pos.getZ(),
+                (-b)*c*tmp.pos.getX()+(-b)*d*tmp.pos.getY()+(-a)*tmp.pos.getZ() + 5);
+            m_visLightPos.append(newPos);
 
-
+            QPoint newScreenCoord = QPoint(300*(m_visLightPos[i].getX()/
+                    m_visLightPos[i].getZ())+800/2,
+                    300*(m_visLightPos[i].getY()/
+                    m_visLightPos[i].getZ())+600/2);
+            m_screenLighsPos.append(newScreenCoord);
+        }
+    }
 
     FaceArr.clear();
     for (int j=0;j<6;j++)

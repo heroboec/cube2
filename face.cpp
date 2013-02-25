@@ -18,7 +18,7 @@ Face::Face(PointDDD& v1, PointDDD& v2, PointDDD& v3, PointDDD& v4 )
 
 
 
-ScreenPolygonFaceCoordsSruct& Face::draw(double a, double b, double c, double d)
+ScreenPolygonFaceCoordsSruct& Face::calculate(double a, double b, double c, double d)
 {
     ScreenPolygonFaceCoordsSructResult.poly0 = polOne.calcCoords(a,b,c,d);
     ScreenPolygonFaceCoordsSructResult.poly1 = polTwo.calcCoords(a,b,c,d);

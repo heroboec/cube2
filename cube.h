@@ -30,6 +30,8 @@ class cube:public QObject
     Q_OBJECT
 private:
     double a,b,c,d;
+    QVector< PointDDD > m_visLightPos;
+    QVector< QPoint > m_screenLighsPos;
     QVector< Face > FaceArr;
     enum {VERTICESCNT=8, SCREENDIST=300};
     void link(QPoint& p1,QPoint& p2);
