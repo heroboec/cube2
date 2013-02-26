@@ -79,7 +79,7 @@ void cube::init()
     m_lights.clear();
     lightSourceData lsd;  // =)
     lsd.amp = 0.51;
-    lsd.color = QColor(Qt::red);
+    lsd.color = QColor(200,25,87,50);
     lsd.pos = PointDDD(3,-2,6);
     m_lights.append(lsd);
     lsd.amp = 0.74;
@@ -87,7 +87,7 @@ void cube::init()
     lsd.pos = PointDDD(-5,-3,7);
     m_lights.append(lsd);
     lsd.amp = 0.32;
-    lsd.color = QColor(Qt::yellow);
+    lsd.color = QColor(200,25,87,50);
     lsd.pos = PointDDD(3,4,-6);
     m_lights.append(lsd);
 
@@ -98,6 +98,10 @@ void cube::init()
     m_screenLighsPos.clear();
     m_visLightPos.clear();
     a = b = c = d = 0;
+
+    m_amb = 0.3f;
+    m_spec = 0.5f;
+    m_diff = 0.5f;
 
 
 }
@@ -149,35 +153,36 @@ void cube::evaluateCube()
         {
             lightSourceData tmp = m_lights[i];
             PointDDD newPos = PointDDD((-d)*tmp.pos.getX()+c*tmp.pos.getY(),
-                (-a)*c*tmp.pos.getX()+(-a)*d*tmp.pos.getY()+b*tmp.pos.getZ(),
-                (-b)*c*tmp.pos.getX()+(-b)*d*tmp.pos.getY()+(-a)*tmp.pos.getZ() + 5);
+                                       (-a)*c*tmp.pos.getX()+(-a)*d*tmp.pos.getY()+b*tmp.pos.getZ(),
+                                       (-b)*c*tmp.pos.getX()+(-b)*d*tmp.pos.getY()+(-a)*tmp.pos.getZ() + 5);
             m_visLightPos.append(newPos);
 
             QPoint newScreenCoord = QPoint(300*(m_visLightPos[i].getX()/
-                    m_visLightPos[i].getZ())+800/2,
-                    300*(m_visLightPos[i].getY()/
-                    m_visLightPos[i].getZ())+600/2);
+                                                m_visLightPos[i].getZ())+800/2,
+                                           300*(m_visLightPos[i].getY()/
+                                                m_visLightPos[i].getZ())+600/2);
             m_screenLighsPos.append(newScreenCoord);
         }
     }
 
-    FaceArr.clear();
+    m_faceArr.clear();
     for (int j=0;j<6;j++)
     {
-        FaceArr.append(m_faces[j]);
-        FaceArr.append(m_faces[j]);
+        m_faceArr.append(m_faces[j]);
+        m_faceArr.append(m_faces[j]);
 
     }
-    qSort(FaceArr.begin(), FaceArr.end(),order);
+    qSort(m_faceArr.begin(), m_faceArr.end(),order);
 
     QColor col(Qt::red);
     for (int t=4;t>-1;t--)
     {
-        drawFaceColor(FaceArr[t],col);
+//        drawFaceColor(m_faceArr[t],col);
+        evaluateSimpleInt();
         pen.setColor(Qt::cyan);
         pen.setStyle(Qt::SolidLine);
         m_cubePainter->setPen(pen);
-        drawFace(FaceArr[t]);
+        drawFace(m_faceArr[t]);
     }
 
 //    static int linkArr[8][3]={{1,3,4},{0,2,5},{1,3,6},
@@ -251,7 +256,55 @@ void cube::clearCubeImage()
 
 void cube::evaluateSimpleInt()
 {
+    double intensityFSH=0;
+    int ax,r,g,b;
 
+    for (int i=3;i>-1;i--)
+    {
+        for (int k = 0;k<3;k++)
+        {
+            ax=r=g=b=32;
+            Polygon poly = m_faceArr[i].getNPolygon(k);
+            for (int j=0;j<m_lights.count();j++)
+            {
+                QVector3D L = this->createVectorByPoint(m_cubeCenter,m_visLightPos[j]);
+                double distance = L.length();
+                L.normalize();
+//                QVector3D V(0,0,-1);
+//                V.normalize();
+                double NandL = QVector3D::dotProduct(L,poly.getNormal());
+                intensityFSH = m_amb/2 + m_lights[j].amp*(NandL*distance);
+                intensityFSH=1/intensityFSH;
+                intensityFSH=4;
+                float angle = getDegree(NandL);
+                if(angle > 0 && angle < 90)
+                {
+                    double a = intensityFSH;
+                    a = m_amb + m_lights[j].amp*NandL;
+//                    r+= m_lights[j].color.red()*a;
+//                    g+= m_lights[j].color.green()*a;
+//                    b+= m_lights[j].color.blue()*a;
+                    ax = 1 - (1 - a)*(1-m_lights[j].color.alpha()/255);//*m_diff;
+                    float temp = a * (1-m_lights[j].color.alpha()/255);
+                    r += (m_lights[j].color.red() * m_lights[j].color.alpha()  + r * temp) / ax;
+                    g += (m_lights[j].color.green()* m_lights[j].color.alpha()  + g * temp) / ax;
+                    b += (m_lights[j].color.blue() * m_lights[j].color.alpha()  + b * temp) / ax;
+                    if (r>255) r = 255;if (r<0) r = 0;
+                    if (g>255) g = 255;if (g<0) g = 0;
+                    if (b>255) b = 255;if (b<0) b = 0;
+                    QColor clr((int)r,(int)g,b);
+                    drawPolyColor(poly,clr);
+                }
+            }
+        }
+    }
+}
+
+
+
+double cube::getDegree(double cos)
+{
+     return cos * (180.0 / 3.1415);
 }
 
 
@@ -275,65 +328,71 @@ void cube::drawFace(Face& fce)
         m_cubePainter->drawLine(poly.v0.x(),poly.v0.y(),poly.v1.x(),poly.v1.y());
         m_cubePainter->drawLine(poly.v0.x(),poly.v0.y(),poly.v2.x(),poly.v2.y());
         m_cubePainter->drawLine(poly.v1.x(),poly.v1.y(),poly.v2.x(),poly.v2.y());
+
+    }
+}
+
+
+void cube::drawPolyColor(Polygon & poly, QColor& color)
+{
+    QPen pen;
+    pen.setColor(color);
+    pen.setStyle(Qt::SolidLine);
+    m_cubePainter->setPen(pen);
+    ScreenPolygonCoordsStruct tmpSCoords = poly.getScreenCords();
+    QVector <QPoint> pointArr;
+    pointArr.clear();
+    pointArr.append(tmpSCoords.v0);
+    pointArr.append(tmpSCoords.v1);
+    pointArr.append(tmpSCoords.v2);
+
+    qSort(pointArr.begin(),pointArr.end(),pointCompare);
+    QPoint A = pointArr[0];
+    QPoint B = pointArr[1];
+    QPoint C = pointArr[2];
+
+
+    int sy = A.y();
+    int x1,x2;
+    for (sy = A.y(); sy >= C.y(); sy--) {
+        if (A.y() == C.y())
+        {
+            x1 = A.x();
+        }
+        else
+        {
+            x1 = (int)(A.x() + (sy - A.y()) * (C.x() - A.x()) / (C.y() - A.y()));
+        }
+        if (sy > B.y())
+            if (A.y() == B.y())
+            {
+                x2 = A.x();
+            }
+        else
+            {
+                x2 = (int)(A.x() + (sy - A.y()) * (B.x() - A.x()) / (B.y() - A.y()));
+            }
+      else {
+            if (C.y() == B.y())
+            {
+                x2 = B.x();
+            }
+        else
+            {
+                x2 = (int)(B.x() + (sy - B.y()) * (C.x() - B.x()) / (C.y() - B.y()));
+            }
+      }
+        m_cubePainter->drawLine(x1,sy,x2,sy);
     }
 }
 
 
 void cube::drawFaceColor(Face& fce, QColor& color)
 {
-    QPen pen;
-    pen.setColor(color);
-    pen.setStyle(Qt::SolidLine);
-    m_cubePainter->setPen(pen);
     for (int i=0;i<2;i++)
     {
         Polygon tmpPoly = fce.getNPolygon(i);
-        ScreenPolygonCoordsStruct tmpSCoords = tmpPoly.getScreenCords();
-        QVector <QPoint> pointArr;
-        pointArr.clear();
-        pointArr.append(tmpSCoords.v0);
-        pointArr.append(tmpSCoords.v1);
-        pointArr.append(tmpSCoords.v2);
-
-        qSort(pointArr.begin(),pointArr.end(),pointCompare);
-        QPoint A = pointArr[0];
-        QPoint B = pointArr[1];
-        QPoint C = pointArr[2];
-
-
-        int sy = A.y();
-        int x1,x2;
-        for (sy = A.y(); sy >= C.y(); sy--) {
-            if (A.y() == C.y())
-            {
-                x1 = A.x();
-            }
-            else
-            {
-                x1 = (int)(A.x() + (sy - A.y()) * (C.x() - A.x()) / (C.y() - A.y()));
-            }
-            if (sy > B.y())
-                if (A.y() == B.y())
-                {
-                    x2 = A.x();
-                }
-            else
-                {
-                    x2 = (int)(A.x() + (sy - A.y()) * (B.x() - A.x()) / (B.y() - A.y()));
-                }
-          else {
-                if (C.y() == B.y())
-                {
-                    x2 = B.x();
-                }
-            else
-                {
-                    x2 = (int)(B.x() + (sy - B.y()) * (C.x() - B.x()) / (C.y() - B.y()));
-                }
-          }
-            m_cubePainter->drawLine(x1,sy,x2,sy);
-        }
-
+        drawPolyColor(tmpPoly,color);
     }
 }
 

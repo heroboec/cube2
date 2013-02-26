@@ -31,8 +31,11 @@ class cube:public QObject
 private:
     double a,b,c,d;
     QVector< PointDDD > m_visLightPos;
+    float m_amb;
+    float m_spec;
+    float m_diff;
     QVector< QPoint > m_screenLighsPos;
-    QVector< Face > FaceArr;
+    QVector< Face > m_faceArr;
     enum {VERTICESCNT=8, SCREENDIST=300};
     void link(QPoint& p1,QPoint& p2);
    // Vertex m_cubeVertices[8];
@@ -61,6 +64,8 @@ private:
     void evaluateSimpleInt();
     void drawFace(Face& fce);
     void drawFaceColor(Face &fce, QColor &color);
+    double getDegree( double  cos );
+    void drawPolyColor(Polygon & poly, QColor& color);
     
 public:
     void evaluateCube();
