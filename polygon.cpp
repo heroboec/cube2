@@ -69,20 +69,20 @@ ScreenPolygonCoordsStruct& Polygon::calcCoords(double a, double b, double c, dou
         m_screenCoord[i].setY(300*(m_visualVertexes[i].getPos().getY()/
                                    m_visualVertexes[i].getPos().getZ())+600/2);
     }
-   // calculateNormal();
+    calculateNormal();
 
-    QVector3D aVect = createVectorByPoint(
-                m_worldVertexes[0].getPos(),
-                m_worldVertexes[1].getPos());
+//    QVector3D aVect = createVectorByPoint(
+//                m_worldVertexes[0].getPos(),
+//                m_worldVertexes[1].getPos());
 
-    QVector3D bVect = createVectorByPoint(
-                m_worldVertexes[0].getPos(),
-                m_worldVertexes[2].getPos());
+//    QVector3D bVect = createVectorByPoint(
+//                m_worldVertexes[0].getPos(),
+//                m_worldVertexes[2].getPos());
 
 
-    QVector3D normal = QVector3D::crossProduct(aVect,bVect);
-    normal.normalize();
-    m_normal = normal;
+//    QVector3D normal = QVector3D::crossProduct(aVect,bVect);
+//    normal.normalize();
+//    m_normal = normal;
     screenCoordsSructResult.v0 = m_screenCoord[0];
     screenCoordsSructResult.v1 = m_screenCoord[1];
     screenCoordsSructResult.v2 = m_screenCoord[2];

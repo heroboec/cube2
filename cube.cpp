@@ -78,8 +78,8 @@ void cube::init()
 
     m_lights.clear();
     lightSourceData lsd;  // =)
-    lsd.amp = 0.51;
-    lsd.color = QColor(200,25,87,50);
+    lsd.amp = 0.9;
+    lsd.color = QColor(255,0,0,255);
     lsd.pos = PointDDD(3,-2,6);
     m_lights.append(lsd);
     lsd.amp = 0.74;
@@ -87,7 +87,7 @@ void cube::init()
     lsd.pos = PointDDD(-5,-3,7);
     m_lights.append(lsd);
     lsd.amp = 0.32;
-    lsd.color = QColor(200,25,87,50);
+    lsd.color = QColor(0,0,255,50);
     lsd.pos = PointDDD(3,4,-6);
     m_lights.append(lsd);
 
@@ -259,13 +259,13 @@ void cube::evaluateSimpleInt()
     double intensityFSH=0;
     int ax,r,g,b;
 
-    for (int i=3;i>-1;i--)
+    for (int i=2;i>-1;i--)
     {
         for (int k = 0;k<3;k++)
         {
-            ax=r=g=b=32;
+            ax=r=g=b=1;
             Polygon poly = m_faceArr[i].getNPolygon(k);
-            for (int j=0;j<m_lights.count();j++)
+            for (int j=0;j<1;j++)
             {
                 QVector3D L = this->createVectorByPoint(m_cubeCenter,m_visLightPos[j]);
                 double distance = L.length();
@@ -273,26 +273,27 @@ void cube::evaluateSimpleInt()
 //                QVector3D V(0,0,-1);
 //                V.normalize();
                 double NandL = QVector3D::dotProduct(L,poly.getNormal());
-                intensityFSH = m_amb/2 + m_lights[j].amp*(NandL*distance);
-                intensityFSH=1/intensityFSH;
-                intensityFSH=4;
+//                intensityFSH = m_amb/2 + m_lights[j].amp*(NandL*distance);
+//                intensityFSH=1/intensityFSH;
+//                intensityFSH=4;
                 float angle = getDegree(NandL);
                 if(angle > 0 && angle < 90)
                 {
                     double a = intensityFSH;
-                    a = m_amb + m_lights[j].amp*NandL;
-//                    r+= m_lights[j].color.red()*a;
-//                    g+= m_lights[j].color.green()*a;
-//                    b+= m_lights[j].color.blue()*a;
-                    ax = 1 - (1 - a)*(1-m_lights[j].color.alpha()/255);//*m_diff;
-                    float temp = a * (1-m_lights[j].color.alpha()/255);
-                    r += (m_lights[j].color.red() * m_lights[j].color.alpha()  + r * temp) / ax;
-                    g += (m_lights[j].color.green()* m_lights[j].color.alpha()  + g * temp) / ax;
-                    b += (m_lights[j].color.blue() * m_lights[j].color.alpha()  + b * temp) / ax;
+                    a = m_lights[j].amp * 0.9*NandL/distance+1;
+
+                    r+= m_lights[j].color.red()*a;
+                    g+= m_lights[j].color.green()*a;
+                    b+= m_lights[j].color.blue()*a;
+//                    ax = 1 - (1 - a)*(1-m_lights[j].color.alpha()/255);//*m_diff;
+//                    float temp = a * (1-m_lights[j].color.alpha()/255);
+//                    r += (m_lights[j].color.red() * m_lights[j].color.alpha()  + r * temp) / ax;
+//                    g += (m_lights[j].color.green()* m_lights[j].color.alpha()  + g * temp) / ax;
+//                    b += (m_lights[j].color.blue() * m_lights[j].color.alpha()  + b * temp) / ax;
                     if (r>255) r = 255;if (r<0) r = 0;
                     if (g>255) g = 255;if (g<0) g = 0;
                     if (b>255) b = 255;if (b<0) b = 0;
-                    QColor clr((int)r,(int)g,b);
+                    QColor clr(r,g,b);
                     drawPolyColor(poly,clr);
                 }
             }
