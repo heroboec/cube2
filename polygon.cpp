@@ -126,17 +126,17 @@ double Polygon::getLayout()
 
 void Polygon::calculateNormal()
 {
-    double x1 = m_worldVertexes[0].getPos().getX();
-    double x2 = m_worldVertexes[1].getPos().getX();
-    double x3 = m_worldVertexes[2].getPos().getX();
+    double x1 = m_visualVertexes[0].getPos().getX();
+    double x2 = m_visualVertexes[1].getPos().getX();
+    double x3 = m_visualVertexes[2].getPos().getX();
 
-    double y1 = m_worldVertexes[0].getPos().getY();
-    double y2 = m_worldVertexes[1].getPos().getY();
-    double y3 = m_worldVertexes[2].getPos().getY();
+    double y1 = m_visualVertexes[0].getPos().getY();
+    double y2 = m_visualVertexes[1].getPos().getY();
+    double y3 = m_visualVertexes[2].getPos().getY();
 
-    double z1 = m_worldVertexes[0].getPos().getZ();
-    double z2 = m_worldVertexes[1].getPos().getZ();
-    double z3 = m_worldVertexes[2].getPos().getZ();
+    double z1 = m_visualVertexes[0].getPos().getZ();
+    double z2 = m_visualVertexes[1].getPos().getZ();
+    double z3 = m_visualVertexes[2].getPos().getZ();
 
 
     double A = y1*(z2 - z3) + y2*(z3 - z1) + y3*(z1 - z2);
@@ -147,15 +147,18 @@ void Polygon::calculateNormal()
 
     if (D > 0)
     {
-        m_normal.setX((-1)*A);
-        m_normal.setY((-1)*B);
-        m_normal.setZ((-1)*C);
-    }
-    else
-    {
         m_normal.setX(A);
         m_normal.setY(B);
         m_normal.setZ(C);
+    }
+    else
+    {
+        m_normal.setX((-1)*A);
+        m_normal.setY((-1)*B);
+        m_normal.setZ((-1)*C);
+
+
+
     }
     m_normal.normalize();
 

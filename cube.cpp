@@ -80,16 +80,16 @@ void cube::init()
     lightSourceData lsd;  // =)
     lsd.amp = 0.9;
     lsd.color = QColor(255,0,0,255);
-    lsd.pos = PointDDD(3,-2,6);
+    lsd.pos = PointDDD(2,0,0);
     m_lights.append(lsd);
-    lsd.amp = 0.74;
-    lsd.color = QColor(Qt::blue);
-    lsd.pos = PointDDD(-5,-3,7);
-    m_lights.append(lsd);
-    lsd.amp = 0.32;
-    lsd.color = QColor(0,0,255,50);
-    lsd.pos = PointDDD(3,4,-6);
-    m_lights.append(lsd);
+//    lsd.amp = 0.74;
+//    lsd.color = QColor(Qt::blue);
+//    lsd.pos = PointDDD(-5,-3,7);
+//    m_lights.append(lsd);
+//    lsd.amp = 0.32;
+//    lsd.color = QColor(0,0,255,50);
+//    lsd.pos = PointDDD(3,4,-6);
+//    m_lights.append(lsd);
 
     m_cubeCenter.setX(0);
     m_cubeCenter.setY(0);
@@ -144,17 +144,16 @@ void cube::evaluateCube()
     for (int i=0;i<6;i++)
     {
         m_faces[i].calculate(a,b,c,d);
-
     }
-
+    m_visLightPos.clear();
+    m_screenLighsPos.clear();
     for (int i = 0; i<m_lights.count();i++)
-    {
-        for (int i=0; i<3; i++)
-        {
+    {        
             lightSourceData tmp = m_lights[i];
-            PointDDD newPos = PointDDD((-d)*tmp.pos.getX()+c*tmp.pos.getY(),
-                                       (-a)*c*tmp.pos.getX()+(-a)*d*tmp.pos.getY()+b*tmp.pos.getZ(),
-                                       (-b)*c*tmp.pos.getX()+(-b)*d*tmp.pos.getY()+(-a)*tmp.pos.getZ() + 5);
+            PointDDD newPos;
+            newPos.setX((-d)*tmp.pos.getX()+c*tmp.pos.getY());
+            newPos.setY((-a)*c*tmp.pos.getX()+(-a)*d*tmp.pos.getY()+b*tmp.pos.getZ());
+            newPos.setZ((-b)*c*tmp.pos.getX()+(-b)*d*tmp.pos.getY()+(-a)*tmp.pos.getZ() + 5);
             m_visLightPos.append(newPos);
 
             QPoint newScreenCoord = QPoint(300*(m_visLightPos[i].getX()/
@@ -162,9 +161,18 @@ void cube::evaluateCube()
                                            300*(m_visLightPos[i].getY()/
                                                 m_visLightPos[i].getZ())+600/2);
             m_screenLighsPos.append(newScreenCoord);
-        }
-    }
 
+    }
+    for (int i=0;i<m_lights.count();i++)
+    {
+        QColor colorr(m_lights[i].color);
+        pen.setColor(colorr);
+        QBrush br(colorr);
+        m_cubePainter->setBrush(br);
+        pen.setStyle(Qt::SolidLine);
+        m_cubePainter->setPen(pen);
+        m_cubePainter->drawEllipse(m_screenLighsPos[i].x(),m_screenLighsPos[i].y(),6,6);
+    }
     m_faceArr.clear();
     for (int j=0;j<6;j++)
     {
