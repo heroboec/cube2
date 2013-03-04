@@ -64,7 +64,7 @@ private:
     void evaluateSimpleInt();
     void drawFace(Face& fce);
     void drawFaceColor(Face &fce, QColor &color);
-    double getDegree( double  cos );
+    double getDegree( double  cosin );
     void drawPolyColor(Polygon & poly, QColor& color);
     
 public:

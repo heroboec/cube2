@@ -11,6 +11,7 @@ private:
     //int vertexes[3];
     QVector3D m_normal;
     double m_polygonIntense;
+    PointDDD m_mid;
     Vertex m_worldVertexes[3];
     Vertex m_visualVertexes[3];
     QPoint m_screenCoord[3];
@@ -20,6 +21,7 @@ private:
     void calculateNormal();
 
 public:
+    PointDDD& getMid();
     Polygon();
     double getLayout();
     Polygon(Vertex& v1, Vertex& v2, Vertex& v3);

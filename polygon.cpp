@@ -41,11 +41,28 @@ double Polygon::getPolyInt()
 }
 
 
+PointDDD& Polygon::getMid()
+{
+    return m_mid;
+}
+
+
 Polygon::Polygon(Vertex& v1, Vertex& v2, Vertex& v3)
 {
     this->m_worldVertexes[0] = v1;
     this->m_worldVertexes[1] = v2;
     this->m_worldVertexes[2] = v3;
+
+    PointDDD a = m_worldVertexes[0].getPos();
+    PointDDD b = m_worldVertexes[1].getPos();
+    PointDDD c = m_worldVertexes[2].getPos();
+
+
+    m_mid.setX((a.getX()+b.getX()+c.getX())/3);
+    m_mid.setY((a.getY()+b.getY()+c.getY())/3);
+    m_mid.setZ((a.getZ()+b.getZ()+c.getZ())/3);
+
+    calculateNormal();
 }
 
 
@@ -69,7 +86,6 @@ ScreenPolygonCoordsStruct& Polygon::calcCoords(double a, double b, double c, dou
         m_screenCoord[i].setY(300*(m_visualVertexes[i].getPos().getY()/
                                    m_visualVertexes[i].getPos().getZ())+600/2);
     }
-    calculateNormal();
 
 //    QVector3D aVect = createVectorByPoint(
 //                m_worldVertexes[0].getPos(),
@@ -126,24 +142,24 @@ double Polygon::getLayout()
 
 void Polygon::calculateNormal()
 {
-    double x1 = m_visualVertexes[0].getPos().getX();
-    double x2 = m_visualVertexes[1].getPos().getX();
-    double x3 = m_visualVertexes[2].getPos().getX();
+    double x1 = m_worldVertexes[0].getPos().getX();
+    double x2 = m_worldVertexes[1].getPos().getX();
+    double x3 = m_worldVertexes[2].getPos().getX();
 
-    double y1 = m_visualVertexes[0].getPos().getY();
-    double y2 = m_visualVertexes[1].getPos().getY();
-    double y3 = m_visualVertexes[2].getPos().getY();
+    double y1 = m_worldVertexes[0].getPos().getY();
+    double y2 = m_worldVertexes[1].getPos().getY();
+    double y3 = m_worldVertexes[2].getPos().getY();
 
-    double z1 = m_visualVertexes[0].getPos().getZ();
-    double z2 = m_visualVertexes[1].getPos().getZ();
-    double z3 = m_visualVertexes[2].getPos().getZ();
+    double z1 = m_worldVertexes[0].getPos().getZ();
+    double z2 = m_worldVertexes[1].getPos().getZ();
+    double z3 = m_worldVertexes[2].getPos().getZ();
 
 
     double A = y1*(z2 - z3) + y2*(z3 - z1) + y3*(z1 - z2);
     double B =  z1*(x2 - x3) + z2*(x3 - x1) + z3*(x1 - x2) ;
     double C = x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2);
     double D = x1*(y2*z3 - y3*z2) + x2*(y3*z1 - y1*z3) + x3*(y1*z2 - y2*z1);
-    D*=-1;
+    D*=1;
 
     if (D > 0)
     {
