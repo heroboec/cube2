@@ -82,18 +82,18 @@ void cube::init()
     lsd.color = QColor(255,0,0,255);
     lsd.pos = PointDDD(2,2,2);
     m_lights.append(lsd);
-    lsd.amp = 0.3;
-    lsd.color = QColor(Qt::blue);
-    lsd.pos = PointDDD(-2,-2,-2);
-    m_lights.append(lsd);
-    lsd.amp = 0.7;
-    lsd.color = QColor(Qt::blue);
-    lsd.pos = PointDDD(2,-2,3);
-    m_lights.append(lsd);
-    lsd.amp = 1;
-    lsd.color = QColor(0,255,0,50);
-    lsd.pos = PointDDD(2,-2,-2);
-    m_lights.append(lsd);
+//    lsd.amp = 0.3;
+//    lsd.color = QColor(Qt::blue);
+//    lsd.pos = PointDDD(-2,-2,-2);
+//    m_lights.append(lsd);
+//    lsd.amp = 0.7;
+//    lsd.color = QColor(Qt::blue);
+//    lsd.pos = PointDDD(2,-2,3);
+//    m_lights.append(lsd);
+//    lsd.amp = 1;
+//    lsd.color = QColor(0,255,0,50);
+//    lsd.pos = PointDDD(2,-2,-2);
+//    m_lights.append(lsd);
 
     m_cubeCenter.setX(0);
     m_cubeCenter.setY(0);
@@ -236,6 +236,7 @@ void cube::evaluateSimpleInt()
 
     int ax,r,g,b;
     double NandL;
+    double VandR;
 
     for (int i=2;i>-1;i--)
     {
@@ -251,15 +252,29 @@ void cube::evaluateSimpleInt()
                 L.normalize();
                 QVector3D n = poly.getNormal();
                 NandL = QVector3D::dotProduct(n,L);
+                //may be vector L need * -1
+                QVector3D tmp;
+                tmp.setX(-1*L.x());
+                tmp.setY(-1*L.y());
+                tmp.setZ(-1*L.z());
+                QVector3D R = getReflVector(tmp,n);
+                QVector3D V = getCameraVector(poly.getMid());
+                VandR = QVector3D::dotProduct(V,R);
+                double reflPart = 0;
+                double reflAngle = getDegree(VandR);
+                if (reflPart>=0 && reflAngle <=90)
+                {
+                    reflPart = 10 * pow(VandR,2);
+                    qDebug() << "reflPart" << reflPart;
+                }
+
+
+
                 float angle = getDegree(NandL);
-                double lightPart;
+                double lightPart = 0;
                 if (angle >= 0 && angle<=90)
                 {
-                    lightPart = (m_diff*m_lights[j].amp*NandL)/(distance+0.2);
-                }
-                else
-                {
-                     lightPart = 0;
+                    lightPart = (m_lights[j].amp*(m_diff*NandL + reflPart))/(distance+0.2);
                 }
 
                 a =  0.3*0.3+lightPart;
@@ -377,4 +392,22 @@ void cube::drawFaceColor(Face& fce, QColor& color)
 
 
 
+QVector3D cube::getReflVector(QVector3D& v, QVector3D& n)
+{
+    float d = (v.x()*n.x() + v.y()*n.y() + v.z()*n.z())/
+            sqrtf(n.x()*n.x() + n.y()*n.y() + n.z()*n.z());
+    return QVector3D(-v.x()+2*d*n.x(), -v.y()+2*d*n.y(), -v.z()+2*d*n.z());
+}
 
+
+
+QVector3D cube::getCameraVector(PointDDD& polyPoint)
+{
+    PointDDD cameraPos;
+    cameraPos.setX(SCREENDIST * sin(m_omega) * cos(m_phi));
+    cameraPos.setY(SCREENDIST * sin(m_omega) * sin(m_phi));
+    cameraPos.setZ(SCREENDIST * cos(m_omega));
+    QVector3D res = createVectorByPoint(polyPoint,cameraPos);
+    res.normalize();
+    return res;
+}
