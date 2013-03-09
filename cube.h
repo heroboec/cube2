@@ -66,6 +66,10 @@ private:
     void drawFaceColor(Face &fce, QColor &color);
     double getDegree( double  cosin );
     void drawPolyColor(Polygon & poly, QColor& color);
+
+    QVector3D getReflVector(QVector3D& v, QVector3D& n);
+    QVector3D getCameraVector(PointDDD& polyPoint);
+
     
 public:
     void evaluateCube();
